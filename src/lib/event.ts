@@ -34,7 +34,7 @@ export async function fetchEvents(): Promise<CommunityEvent[]> {
 		try {
 			const res = await fetch(EVENT_LIST_URL, {
 				headers: {
-					'User-Agent': 'Mozilla/5.0',
+					'User-Agent': 'Mozilla/5.0 GDG',
 					Accept: 'application/json'
 				}
 			});
