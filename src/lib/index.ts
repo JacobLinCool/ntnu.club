@@ -1,7 +1,12 @@
 export const HOME = "https://gdg.community.dev/gdg-on-campus-national-taiwan-normal-university-taipei-taiwan/";
 
 export async function fetchEvents() {
-    const res = await fetch("https://gdg.community.dev/api/chapter/1652/event/");
+    const res = await fetch("https://gdg.community.dev/api/chapter/1652/event/", {
+        headers: {
+            "User-Agent": "Mozilla/5.0 ntnu.club",
+            "Accept": "application/json",
+        },
+    });
     const text = await res.text();
     console.log(text);
     const { results } = JSON.parse(text) as { results: { id: number, url: string }[] };
