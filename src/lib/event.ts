@@ -1,3 +1,4 @@
+import { dev } from '$app/environment';
 import { EVENT_LIST_URL } from './constant';
 import { parseId } from './utils';
 
@@ -18,6 +19,10 @@ let cache: CacheData | null = null;
 let fetchPromise: Promise<CommunityEvent[]> | null = null;
 
 export async function fetchEvents(): Promise<CommunityEvent[]> {
+	if (dev) {
+		return await import('./testdata').then((m) => m.fakeEvents);
+	}
+
 	const now = Date.now();
 
 	// Check if cache is valid (less than 60 seconds old)
@@ -82,4 +87,11 @@ export function resolveEvent(ref: string, events: CommunityEvent[]): CommunityEv
 	}
 
 	return null;
+}
+
+export function currentEvents(events: CommunityEvent[]): CommunityEvent[] {
+	const currentDate = new Date();
+	return events.filter(
+		(event) => new Date(event.end_date) >= currentDate && new Date(event.start_date) <= currentDate
+	);
 }

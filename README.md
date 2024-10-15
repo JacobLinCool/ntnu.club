@@ -7,3 +7,7 @@ If you are a student at NTNU and want to use a subdomain of `ntnu.club`, please 
 ## Get short URL of upcoming events
 
 Go to [https://ntnu.club/events](https://ntnu.club/events).
+
+## Get current running event
+
+Go to [https://ntnu.club/now](https://ntnu.club/now).

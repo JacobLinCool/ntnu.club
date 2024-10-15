@@ -1,23 +1,18 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { page } from '$app/stores';
+	import { publish } from '$lib/notification';
+	import QR from '$lib/component/QR.svelte';
 
 	export let data: PageData;
 
 	const origin = $page.url.origin;
 
-	let alertMessage = '';
-	let showAlert = false;
-	let timer = 0;
-
 	function copyToClipboard(text: string) {
 		navigator.clipboard
 			.writeText(text)
 			.then(() => {
-				alertMessage = `Copied: ${text}`;
-				showAlert = true;
-				clearTimeout(timer);
-				timer = setTimeout(() => (showAlert = false), 5000);
+				publish({ type: 'info', message: `Copied: ${text}` });
 			})
 			.catch((err) => {
 				console.error('Failed to copy: ', err);
@@ -35,6 +30,11 @@
 					<h2 class="card-title">
 						{event.title} <span class="badge badge-accent badge-outline">{event.code}</span>
 					</h2>
+
+					<div class="w-80">
+						<QR text={`${origin}/${event.code}`} margin={2} />
+					</div>
+
 					<div class="card-actions justify-end">
 						<button
 							class="btn btn-sm btn-secondary"
@@ -56,11 +56,3 @@
 		{/each}
 	</div>
 </div>
-
-{#if showAlert}
-	<div class="toast">
-		<div class="alert alert-info">
-			<span>{alertMessage}</span>
-		</div>
-	</div>
-{/if}
