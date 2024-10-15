@@ -1,14 +1,11 @@
-export const HOME = "https://gdg.community.dev/gdg-on-campus-national-taiwan-normal-university-taipei-taiwan/";
+import { alphabet2number } from './utils';
 
-export async function fetchEvents() {
-    const res = await fetch("https://gdg.community.dev/api/chapter/1652/event/", {
-        headers: {
-            "User-Agent": "Mozilla/5.0 ntnu.club",
-            "Accept": "application/json",
-        },
-    });
-    const text = await res.text();
-    console.log(text);
-    const { results } = JSON.parse(text) as { results: { id: number, url: string }[] };
-    return results;
+export function parseId(id: string): number {
+	const num = parseInt(id);
+	if (!isNaN(num)) return num;
+	return alphabet2number(id);
 }
+
+export * from './constant';
+export * from './event';
+export * from './utils';
