@@ -18,3 +18,9 @@ export function number2alphabet(n: number): string {
 	}
 	return result;
 }
+
+export function parseId(id: string): number {
+	const num = parseInt(id);
+	if (!isNaN(num)) return num;
+	return alphabet2number(id);
+}

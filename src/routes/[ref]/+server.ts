@@ -1,13 +1,11 @@
 import { isRedirect, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { fetchEvents, HOME, parseId } from '$lib';
+import { fetchEvents, HOME, resolveEvent } from '$lib';
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {
-		const id = parseId(params.eventId);
-		console.log(id);
 		const events = await fetchEvents();
-		const matched = events.find((e) => e.id === id);
+		const matched = resolveEvent(params.ref, events);
 		const url = matched?.url;
 		if (!url) {
 			throw new Error('Event not found');

@@ -1,4 +1,5 @@
 import { EVENT_LIST_URL } from './constant';
+import { parseId } from './utils';
 
 export interface CommunityEvent {
 	id: number;
@@ -54,4 +55,31 @@ export async function fetchEvents(): Promise<CommunityEvent[]> {
 	})();
 
 	return fetchPromise;
+}
+
+export function resolveEvent(ref: string, events: CommunityEvent[]): CommunityEvent | null {
+	// for id ref like 'abc', '123', etc.
+	try {
+		const id = parseId(ref);
+		const event = events.find((e) => e.id === id);
+		if (event) return event;
+	} catch {
+		// do nothing
+	}
+
+	// for ref as date like '20241230' or '2024-12-30'
+	const date = ref.match(/\d/g)?.join('');
+	if (date) {
+		const event = events.find((e) => {
+			// parse date to +8 timezone YYYYMMDD with intl
+			const start = new Date(e.start_date)
+				.toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' })
+				.replace(/\//g, '')
+				.replace(/-/g, '');
+			return start === date;
+		});
+		if (event) return event;
+	}
+
+	return null;
 }
