@@ -1,6 +1,7 @@
 import { isRedirect, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { fetchEvents, HOME, resolveEvent } from '$lib';
+import { HOME } from '$lib/constant';
+import { fetchEvents, resolveEvent } from '$lib/event';
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {

@@ -1,16 +1,10 @@
 import type { PageServerLoad } from './$types';
-import { fetchEvents, number2alphabet } from '$lib';
+import { fetchEvents, attachCode, type CommunityEventWithCode } from '$lib/event';
 
 export const load: PageServerLoad = async () => {
 	const events = await fetchEvents();
-	const currentDate = new Date();
 
-	const formattedEvents = events
-		.filter((event) => new Date(event.end_date) >= currentDate)
-		.map((event) => ({
-			...event,
-			code: number2alphabet(event.id)
-		}));
+	const formattedEvents: CommunityEventWithCode[] = events.map(attachCode);
 
 	return { events: formattedEvents };
 };

@@ -1,6 +1,5 @@
-import { dev } from '$app/environment';
 import { EVENT_LIST_URL } from './constant';
-import { parseId } from './utils';
+import { number2alphabet, parseId } from './utils';
 
 export interface CommunityEvent {
 	id: number;
@@ -8,6 +7,10 @@ export interface CommunityEvent {
 	title: string;
 	start_date: string;
 	end_date: string;
+}
+
+export interface CommunityEventWithCode extends CommunityEvent {
+	code: string;
 }
 
 interface CacheData {
@@ -19,10 +22,6 @@ let cache: CacheData | null = null;
 let fetchPromise: Promise<CommunityEvent[]> | null = null;
 
 export async function fetchEvents(): Promise<CommunityEvent[]> {
-	if (dev) {
-		return await import('./testdata').then((m) => m.fakeEvents);
-	}
-
 	const now = Date.now();
 
 	// Check if cache is valid (less than 60 seconds old)
@@ -89,9 +88,52 @@ export function resolveEvent(ref: string, events: CommunityEvent[]): CommunityEv
 	return null;
 }
 
-export function currentEvents(events: CommunityEvent[]): CommunityEvent[] {
-	const currentDate = new Date();
-	return events.filter(
-		(event) => new Date(event.end_date) >= currentDate && new Date(event.start_date) <= currentDate
-	);
+export function attachCode(event: CommunityEvent): CommunityEventWithCode {
+	return {
+		...event,
+		code: number2alphabet(event.id)
+	};
+}
+
+export function splitEvents<E extends CommunityEvent>(
+	events: E[],
+	upcomingRange = 60 * 60 * 1000
+): {
+	current: E | undefined;
+	upcoming: E | undefined;
+	past: E[];
+	next: E[];
+} {
+	const now = new Date();
+	const oneHourFromNow = new Date(now.getTime() + upcomingRange);
+
+	events.sort((a, b) => a.start_date.localeCompare(b.start_date));
+
+	const currentIdx = events.findIndex((event) => {
+		const startDate = new Date(event.start_date);
+		const endDate = new Date(event.end_date);
+		return startDate <= now && endDate >= now;
+	});
+	const current = currentIdx >= 0 ? events[currentIdx] : undefined;
+
+	const upcomingIdx = events.findIndex((event) => {
+		const startDate = new Date(event.start_date);
+		return startDate > now && startDate < oneHourFromNow;
+	});
+	const upcoming = upcomingIdx >= 0 ? events[upcomingIdx] : undefined;
+
+	const pastDate = current
+		? new Date(current.start_date)
+		: upcoming
+			? new Date(upcoming.start_date)
+			: new Date();
+	const nextDate = upcoming
+		? new Date(upcoming.start_date)
+		: current
+			? new Date(current.start_date)
+			: new Date();
+	const past = events.filter((event) => new Date(event.start_date) < pastDate).reverse();
+	const next = events.filter((event) => new Date(event.start_date) > nextDate);
+
+	return { current, upcoming, past, next };
 }
